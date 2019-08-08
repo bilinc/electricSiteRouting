@@ -1,0 +1,8 @@
+%% Integrity Modeler - Simulation "Analysis"
+clear all; close all; clc
+filename = 'ptc_simulation_data.xlsx';
+sheet = 1;
+xlRange = 'A2:B2:C2';
+test = xlsread(filename,sheet)
+%%
+plot(test(3:end,1), test(3:end,2))

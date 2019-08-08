@@ -1,0 +1,172 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>fun_modroads</title><meta name="generator" content="MATLAB 9.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-07-17"><meta name="DC.source" content="fun_modroads.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [legal, costs] = fun_modroads(to_delete,A,C,roads,n,sid,fid)
+delete = [];
+ind = 1;
+<span class="keyword">for</span> i = 1:length(to_delete)
+    <span class="comment">% Index of Road segment to delete</span>
+    mod_roads = roads;  <span class="comment">% Modifying road segments individually</span>
+                        <span class="comment">% uncomment for multiple node modification</span>
+                        <span class="comment">% and change back mod_roads to roads</span>
+
+    delete = [delete; find(strcmp(mod_roads, to_delete{i}))'];
+    <span class="comment">% Add the None disconnected road as reference</span>
+
+    <span class="keyword">if</span> strcmp(mod_roads, to_delete{i}) == false
+        delete = [1 1];
+    <span class="keyword">end</span>
+    <span class="comment">% Start "deleting" roads</span>
+    mod_roads{delete(i,1)} = [];
+
+    <span class="keyword">if</span> isempty(mod_roads{delete(i,1)} ) == true
+        mod_roads{delete(i,2)} = [];
+    <span class="keyword">end</span>
+    <span class="comment">% Update A - node matrix</span>
+    AA = A;
+    <span class="keyword">for</span> ii = 1:14*14
+        <span class="keyword">if</span> isempty(mod_roads{ii}) == false
+            AA(ii) = 1;
+        <span class="keyword">else</span>
+            AA(ii) = 0;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="comment">% Send the disconnect node matrix for processing</span>
+    [routing,cost] = fun_roads(AA,C,mod_roads,n,sid,fid);
+    costs(ind) = cost;
+
+    <span class="keyword">for</span> idx = 1:length(routing)
+        legal{ind,idx} = routing{1,idx};	<span class="comment">% Save the road segments from routing as legal roads, index-wise</span>
+
+    <span class="keyword">end</span>
+    legal{ind,length(routing)+1} = cost;    <span class="comment">% Add costs to the end of legal roads</span>
+    ind = ind + 1;
+
+<span class="comment">%     if strcmp(roads, to_delete{i+1}) == false % if the node are duplicate exit</span>
+<span class="comment">%         return % Exit the function</span>
+<span class="comment">%     end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span> <span class="comment">% end of function</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in fun_modroads (line 4)
+for i = 1:length(to_delete)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [legal, costs] = fun_modroads(to_delete,A,C,roads,n,sid,fid)
+delete = [];
+ind = 1;
+for i = 1:length(to_delete)
+    % Index of Road segment to delete
+    mod_roads = roads;  % Modifying road segments individually 
+                        % uncomment for multiple node modification
+                        % and change back mod_roads to roads
+                        
+    delete = [delete; find(strcmp(mod_roads, to_delete{i}))'];
+    % Add the None disconnected road as reference
+
+    if strcmp(mod_roads, to_delete{i}) == false
+        delete = [1 1];
+    end
+    % Start "deleting" roads
+    mod_roads{delete(i,1)} = [];
+    
+    if isempty(mod_roads{delete(i,1)} ) == true
+        mod_roads{delete(i,2)} = [];
+    end
+    % Update A - node matrix
+    AA = A;
+    for ii = 1:14*14
+        if isempty(mod_roads{ii}) == false
+            AA(ii) = 1;
+        else
+            AA(ii) = 0;
+        end
+    end
+    % Send the disconnect node matrix for processing
+    [routing,cost] = fun_roads(AA,C,mod_roads,n,sid,fid);
+    costs(ind) = cost;
+    
+    for idx = 1:length(routing)
+        legal{ind,idx} = routing{1,idx};	% Save the road segments from routing as legal roads, index-wise
+        
+    end
+    legal{ind,length(routing)+1} = cost;    % Add costs to the end of legal roads
+    ind = ind + 1;
+    
+%     if strcmp(roads, to_delete{i+1}) == false % if the node are duplicate exit
+%         return % Exit the function
+%     end
+    
+end
+
+end % end of function
+##### SOURCE END #####
+--></body></html>
